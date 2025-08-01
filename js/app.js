@@ -592,9 +592,20 @@ class KamenRunApp {
                         </div>
                         
                         <div id="camera-container" style="display: none;">
-                            <video id="qr-video" class="w-100 mb-3" style="max-height: 300px;"></video>
-                            <div class="alert alert-warning">
-                                <small>Arahkan kamera ke QR code untuk scan otomatis</small>
+                            <div class="position-relative">
+                                <video id="qr-video" class="w-100 mb-3" style="max-height: 300px; border-radius: 8px;"></video>
+                                <div class="position-absolute top-50 start-50 translate-middle" style="pointer-events: none;">
+                                    <div class="border border-3 border-success rounded" style="width: 200px; height: 200px; opacity: 0.7;">
+                                        <div class="position-absolute top-0 start-0 border-top border-start border-success" style="width: 20px; height: 20px;"></div>
+                                        <div class="position-absolute top-0 end-0 border-top border-end border-success" style="width: 20px; height: 20px;"></div>
+                                        <div class="position-absolute bottom-0 start-0 border-bottom border-start border-success" style="width: 20px; height: 20px;"></div>
+                                        <div class="position-absolute bottom-0 end-0 border-bottom border-end border-success" style="width: 20px; height: 20px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <small>Arahkan kamera ke QR code dan posisikan dalam kotak hijau untuk scan otomatis</small>
                             </div>
                         </div>
                         
@@ -602,6 +613,12 @@ class KamenRunApp {
                              <input type="file" class="form-control mb-2" id="qr-file-input" accept="image/*">
                              <div class="text-center mb-2">atau</div>
                              <textarea class="form-control" id="manual-data-input" rows="4" placeholder="Paste data QR code di sini jika tidak bisa scan"></textarea>
+                             <div class="form-text mb-2">
+                                 <small>
+                                     <i class="fas fa-info-circle me-1"></i>
+                                     Jika QR code tidak bisa di-scan, Anda bisa copy-paste data JSON dari QR code generator atau hasil export sebelumnya.
+                                 </small>
+                             </div>
                              <button type="button" class="btn btn-outline-primary btn-sm mt-2 w-100" id="process-manual-data">
                                  <i class="fas fa-paste me-2"></i>Process Manual Data
                              </button>
@@ -679,20 +696,60 @@ class KamenRunApp {
 
     async startCameraScanning(video) {
         try {
+            // Show scanning status
+            const importResult = document.getElementById('import-result');
+            importResult.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    Mengakses kamera...
+                </div>
+            `;
+            
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
             });
+            
             video.srcObject = stream;
             video.play();
             
-            // Start QR scanning (simplified implementation)
+            // Update status when video starts playing
+            video.onloadedmetadata = () => {
+                importResult.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-camera me-2"></i>
+                        Kamera aktif. Arahkan ke QR code untuk scan otomatis.
+                    </div>
+                `;
+            };
+            
+            // Start QR scanning
             this.scanningInterval = setInterval(() => {
                 this.captureAndScanFrame(video);
             }, 500);
             
         } catch (error) {
             console.error('Camera access failed:', error);
-            this.showToast('Tidak dapat mengakses kamera. Gunakan upload file.', 'error');
+            const importResult = document.getElementById('import-result');
+            
+            let errorMessage = 'Tidak dapat mengakses kamera.';
+            if (error.name === 'NotAllowedError') {
+                errorMessage = 'Izin kamera ditolak. Silakan izinkan akses kamera di pengaturan browser.';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage = 'Kamera tidak ditemukan. Pastikan perangkat memiliki kamera.';
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage = 'Browser tidak mendukung akses kamera.';
+            }
+            
+            importResult.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    ${errorMessage}
+                </div>
+            `;
         }
     }
 
@@ -708,15 +765,168 @@ class KamenRunApp {
     }
 
     captureAndScanFrame(video) {
-        // This is a simplified implementation
-        // In a real app, you'd use a QR code scanning library like jsQR
-        console.log('Scanning frame...');
+        try {
+            // Create canvas to capture video frame
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            // Set canvas size to video size
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Get image data for QR scanning
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Use jsQR to scan for QR codes
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
+            
+            if (code) {
+                console.log('QR Code found:', code.data);
+                this.stopCameraScanning();
+                
+                // Show success message
+                const importResult = document.getElementById('import-result');
+                importResult.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        QR code berhasil di-scan! Memproses data...
+                    </div>
+                `;
+                
+                // Process the QR data
+                setTimeout(() => {
+                    this.processQRData(code.data);
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Error scanning frame:', error);
+        }
     }
 
     async processQRImage(file) {
-        // This would typically use a QR code reading library
-        // For now, we'll show a placeholder
-        this.showToast('Fitur scan QR dari gambar akan segera hadir! Gunakan manual input sebagai alternatif.', 'info');
+        try {
+            // Show loading state
+            const importResult = document.getElementById('import-result');
+            importResult.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    Memproses gambar QR code...
+                </div>
+            `;
+            
+            // Create canvas to process image
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                // Set canvas size to image size
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // Draw image to canvas
+                context.drawImage(img, 0, 0);
+                
+                // Get image data for QR scanning
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Use jsQR to scan for QR codes
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                
+                if (code) {
+                    console.log('QR Code found in image:', code.data);
+                    importResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            QR code berhasil ditemukan dalam gambar! Memproses data...
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        this.processQRData(code.data);
+                    }, 1000);
+                } else {
+                    importResult.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            QR code tidak ditemukan dalam gambar. Pastikan gambar jelas dan QR code terlihat dengan baik.
+                        </div>
+                    `;
+                }
+            };
+            
+            img.onerror = () => {
+                importResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Gagal memuat gambar. Pastikan file adalah gambar yang valid.
+                    </div>
+                `;
+            };
+            
+            // Load image from file
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+        } catch (error) {
+            console.error('Error processing QR image:', error);
+            const importResult = document.getElementById('import-result');
+            importResult.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    Error: ${error.message}
+                </div>
+            `;
+        }
+    }
+
+    // Common method to process QR data from any source
+    processQRData(qrData) {
+        try {
+            // Try to parse the QR data
+            let parsedData;
+            
+            // First, try to parse as JSON
+            try {
+                parsedData = JSON.parse(qrData);
+            } catch (error) {
+                // If not JSON, try to decode URL-encoded data
+                try {
+                    const decodedData = decodeURIComponent(qrData);
+                    parsedData = JSON.parse(decodedData);
+                } catch (decodeError) {
+                    throw new Error('QR code tidak berisi data yang valid');
+                }
+            }
+            
+            // Validate the parsed data
+            if (!parsedData || !parsedData.data) {
+                throw new Error('Format data tidak sesuai');
+            }
+            
+            // Show preview using the existing method
+            this.processManualQRData(JSON.stringify(parsedData));
+            
+        } catch (error) {
+            console.error('Error processing QR data:', error);
+            const importResult = document.getElementById('import-result');
+            importResult.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    Error: ${error.message}
+                </div>
+            `;
+        }
     }
 
     processManualQRData(data) {
@@ -725,8 +935,28 @@ class KamenRunApp {
             const importResult = document.getElementById('import-result');
             const confirmBtn = document.getElementById('confirm-import-btn');
             
+            // Clean the input data
+            let cleanData = data.trim();
+            
+            // Remove any extra quotes or formatting
+            if (cleanData.startsWith('"') && cleanData.endsWith('"')) {
+                cleanData = cleanData.slice(1, -1);
+            }
+            
+            // Try to decode URL-encoded data first
+            try {
+                cleanData = decodeURIComponent(cleanData);
+            } catch (e) {
+                // If decode fails, use original data
+            }
+            
             // Try to parse and validate the data
-            const parsedData = JSON.parse(data);
+            let parsedData;
+            try {
+                parsedData = JSON.parse(cleanData);
+            } catch (parseError) {
+                throw new Error('Format JSON tidak valid. Pastikan data QR code lengkap dan tidak rusak.');
+            }
             
             // Validate based on version
             let phaseCount, taskCount = 0;
@@ -746,16 +976,19 @@ class KamenRunApp {
                 
                 phaseCount = Object.keys(parsedData.data.progress).length;
                 
-            } else {
+            } else if (parsedData.version === '1.0.0') {
                 // Legacy format
                 if (!parsedData.data || !parsedData.data.runningScheduleData) {
                     throw new Error('Format data tidak valid');
                 }
                 phaseCount = parsedData.data.runningScheduleData.length;
+            } else {
+                throw new Error('Versi data tidak dikenali');
             }
             
             const notification = parsedData.data.notificationTime || 'Tidak diatur';
             const progress = parsedData.data.currentProgress || '0';
+            const timestamp = parsedData.timestamp ? new Date(parsedData.timestamp).toLocaleString('id-ID') : 'Tidak ada';
             
             const formatInfo = parsedData.version === '2.0.0' ? 
                 `<li><strong>Format:</strong> Optimized (v2.0) - ${taskCount} tugas selesai</li>` :
@@ -769,14 +1002,14 @@ class KamenRunApp {
                         <li><strong>Fase dengan Progress:</strong> ${phaseCount}</li>
                         <li><strong>Waktu Notifikasi:</strong> ${notification}</li>
                         <li><strong>Progress:</strong> ${progress}%</li>
-                        <li><strong>Timestamp:</strong> ${new Date(parsedData.timestamp).toLocaleString('id-ID')}</li>
+                        <li><strong>Timestamp:</strong> ${timestamp}</li>
                     </ul>
                 </div>
             `;
             
             confirmBtn.style.display = 'block';
             confirmBtn.onclick = () => {
-                this.importDataFromQR(data);
+                this.importDataFromQR(cleanData);
                 bootstrap.Modal.getInstance(document.getElementById('qrModal')).hide();
             };
             
@@ -786,6 +1019,13 @@ class KamenRunApp {
                 <div class="alert alert-danger">
                     <h6><i class="fas fa-exclamation-triangle me-2"></i>Data Tidak Valid</h6>
                     <p class="mb-0">Error: ${error.message}</p>
+                    <hr>
+                    <small>
+                        <strong>Tips:</strong><br>
+                        • Pastikan data QR code lengkap dan tidak terpotong<br>
+                        • Jika menggunakan manual input, copy-paste seluruh data<br>
+                        • Coba scan ulang QR code jika masih bermasalah
+                    </small>
                 </div>
             `;
             
