@@ -1,0 +1,3 @@
+KamenRun is basically a simple run schedule tracker web app, that its name has duality meaning. Kamen can be interpreting the word common or come on.
+The idea that i'm creating this website are from my personal target as a daily worker that has zero experience in running but with a dream of participating half marathon in just one year training without a coach.
+Eventhough without envolving a real coach, the schedule recommendation came from Dr Tirta & Coach Latief Nurarifin podcast that has been summarize with help of Google Gemini AI. You can watch the full podcast here https://www.youtube.com/watch?v=nogKhQBu12A

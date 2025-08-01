@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Running Journey</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #4CAF50;
+            --light-gray: #f4f4f9;
+            --dark-gray: #333;
+            --bg-color: #ffffff;
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        #motivation {
+            font-style: italic;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .progress-section {
+            margin-bottom: 25px;
+        }
+
+        .progress-section h3 {
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 25px;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), #81C784);
+            border-radius: 25px;
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .controls select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+        }
+
+        #schedule-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .day-card {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .day-card.done {
+            background-color: #e8f5e9; /* Light green */
+            border-left: 5px solid var(--secondary-color);
+        }
+        
+        .day-card.done .task-text {
+            text-decoration: line-through;
+            color: #757575;
+        }
+
+        .day-card h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .task-text {
+            flex-grow: 1;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>My Running Journey</h1>
+            <p id="motivation">Loading motivation...</p>
+        </header>
+
+        <section class="progress-section">
+            <h3>Progress Fase Ini</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+        </section>
+
+        <section class="controls">
+            <select id="phase-select"></select>
+            <select id="week-select"></select>
+        </section>
+
+        <main id="schedule-container"></main>
+        
+        <footer>
+            <p>Centang jadwal untuk menyimpan progres. Data tersimpan di browser Anda.</p>
+        </footer>
+    </div>
+
+    <script>
+        const scheduleData = [
+            // Fase 1: Zero to 5K (10 Weeks)
+            {
+                phaseName: "Fase 1: Zero to 5K",
+                weeks: Array.from({ length: 10 }, (_, i) => {
+                    let runWalkDesc = `Lari ${Math.floor(i/2) + 1} menit, Jalan ${Math.max(1, 4 - Math.floor(i/2))} menit. Ulangi 6-8x.`;
+                    if(i >= 8) runWalkDesc = `Lari 5 menit, Jalan 1 menit. Ulangi 5x.`
+                    return {
+                        weekNumber: i + 1,
+                        days: [
+                            { day: "Senin", task: "Istirahat", done: false },
+                            { day: "Selasa", task: `Lari/Jalan: ${runWalkDesc}`, done: false },
+                            { day: "Rabu", task: "Istirahat atau Cross Training (Yoga, Sepeda)", done: false },
+                            { day: "Kamis", task: `Lari/Jalan: ${runWalkDesc}`, done: false },
+                            { day: "Jumat", task: "Istirahat", done: false },
+                            { day: "Sabtu", task: `Lari Jarak Jauh (Pemula): ${2 + i * 0.5} km`, done: false },
+                            { day: "Minggu", task: "Istirahat atau Strength Training (Squat, Lunges)", done: false },
+                        ]
+                    }
+                })
+            },
+            // Fase 2: 5K to 10K (10 Weeks)
+            {
+                phaseName: "Fase 2: 5K to 10K",
+                weeks: Array.from({ length: 10 }, (_, i) => ({
+                    weekNumber: i + 1,
+                    days: [
+                        { day: "Senin", task: "Istirahat", done: false },
+                        { day: "Selasa", task: `Easy Run: ${3 + Math.floor(i/2)} km`, done: false },
+                        { day: "Rabu", task: "Strength Training atau Istirahat", done: false },
+                        { day: "Kamis", task: `Lari Variasi Pace: ${4 + Math.floor(i/2)} km`, done: false },
+                        { day: "Jumat", task: "Istirahat", done: false },
+                        { day: "Sabtu", task: `Long Run: ${5 + i} km`, done: false },
+                        { day: "Minggu", task: "Istirahat atau Active Recovery (Jalan santai)", done: false },
+                    ]
+                }))
+            },
+            // Fase 3: 10K to Half Marathon (16 Weeks)
+            {
+                phaseName: "Fase 3: 10K to Half Marathon",
+                weeks: Array.from({ length: 16 }, (_, i) => ({
+                    weekNumber: i + 1,
+                    days: [
+                        { day: "Senin", task: "Istirahat", done: false },
+                        { day: "Selasa", task: `Easy Run: ${5 + Math.floor(i/4)} km`, done: false },
+                        { day: "Rabu", task: "Strength Training (Wajib)", done: false },
+                        { day: "Kamis", task: `Tempo Run: ${6 + Math.floor(i/3)} km total`, done: false },
+                        { day: "Jumat", task: "Istirahat", done: false },
+                        { day: "Sabtu", task: `Long Run: ${10 + i} km`.concat(i===15 ? ' (Taper Week, lari 8 km saja!)' : ''), done: false },
+                        { day: "Minggu", task: "Istirahat Total", done: false },
+                    ]
+                }))
+            },
+        ];
+
+        const motivationalQuotes = [
+            "Langkah pertama adalah yang tersulit. Kamu sudah melewatinya!",
+            "Hari ini sakit, besok jadi kuat. Terus berlari!",
+            "Jangan ragu saat lelah, ragulah saat kamu berhenti.",
+            "Satu-satunya lari yang buruk adalah yang tidak kamu lakukan.",
+            "Berlari adalah tentang dirimu sendiri. Kamu vs Kamu.",
+            "Konsistensi lebih penting dari kecepatan.",
+            "Kamu lebih kuat dari yang kamu kira. Buktikan hari ini!",
+            "Setiap kilometer adalah pencapaian.",
+            "Jangan biarkan pikiranmu menghentikan kakimu."
+        ];
+
+        let currentData;
+        const phaseSelect = document.getElementById('phase-select');
+        const weekSelect = document.getElementById('week-select');
+        const scheduleContainer = document.getElementById('schedule-container');
+        const progressBar = document.getElementById('progressBar');
+        const motivationElement = document.getElementById('motivation');
+
+        function saveData() {
+            localStorage.setItem('runningScheduleData', JSON.stringify(currentData));
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('runningScheduleData');
+            if (savedData) {
+                return JSON.parse(savedData);
+            }
+            return JSON.parse(JSON.stringify(scheduleData)); // Deep copy
+        }
+
+        function populatePhaseSelect() {
+            currentData.forEach((phase, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = phase.phaseName;
+                phaseSelect.appendChild(option);
+            });
+        }
+
+        function populateWeekSelect(phaseIndex) {
+            weekSelect.innerHTML = '';
+            const phase = currentData[phaseIndex];
+            phase.weeks.forEach((week, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `Minggu ${week.weekNumber}`;
+                weekSelect.appendChild(option);
+            });
+        }
+
+        function renderSchedule(phaseIndex, weekIndex) {
+            scheduleContainer.innerHTML = '';
+            const week = currentData[phaseIndex].weeks[weekIndex];
+            week.days.forEach((day, dayIndex) => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+                if (day.done) {
+                    dayCard.classList.add('done');
+                }
+
+                dayCard.innerHTML = `
+                    <h4>${day.day}</h4>
+                    <div class="task">
+                        <input type="checkbox" id="task-${dayIndex}" ${day.done ? 'checked' : ''}>
+                        <label for="task-${dayIndex}" class="task-text">${day.task}</label>
+                    </div>
+                `;
+
+                const checkbox = dayCard.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', () => {
+                    toggleTaskStatus(phaseIndex, weekIndex, dayIndex);
+                    dayCard.classList.toggle('done');
+                });
+                
+                scheduleContainer.appendChild(dayCard);
+            });
+            updateProgress(phaseIndex);
+        }
+
+        function toggleTaskStatus(phaseIndex, weekIndex, dayIndex) {
+            currentData[phaseIndex].weeks[weekIndex].days[dayIndex].done = !currentData[phaseIndex].weeks[weekIndex].days[dayIndex].done;
+            saveData();
+            updateProgress(phaseIndex);
+        }
+
+        function updateProgress(phaseIndex) {
+            const phase = currentData[phaseIndex];
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            phase.weeks.forEach(week => {
+                week.days.forEach(day => {
+                    // Hanya hitung tugas lari/olahraga, bukan istirahat
+                    if (!day.task.toLowerCase().includes('istirahat')) {
+                        totalTasks++;
+                        if (day.done) {
+                            completedTasks++;
+                        }
+                    }
+                });
+            });
+
+            const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${percentage}%`;
+        }
+
+        function showMotivation() {
+            const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+            motivationElement.textContent = `"${motivationalQuotes[randomIndex]}"`;
+        }
+        
+        function initApp() {
+            currentData = loadData();
+            populatePhaseSelect();
+            populateWeekSelect(0);
+            renderSchedule(0, 0);
+            showMotivation();
+
+            phaseSelect.addEventListener('change', (e) => {
+                const newPhaseIndex = e.target.value;
+                populateWeekSelect(newPhaseIndex);
+                renderSchedule(newPhaseIndex, 0);
+            });
+
+            weekSelect.addEventListener('change', (e) => {
+                const newWeekIndex = e.target.value;
+                renderSchedule(phaseSelect.value, newWeekIndex);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
