@@ -327,6 +327,82 @@ body {
     }
 }
 
+/* Tabs styling */
+.tabs-section {
+    background: white;
+    border-radius: var(--border-radius);
+    margin: 1.5rem;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+.nav-tabs {
+    border-bottom: none;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.nav-tabs .nav-item {
+    margin-bottom: 0;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    background: transparent;
+    color: var(--dark-gray);
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+.nav-tabs .nav-link:hover {
+    background: rgba(0, 123, 255, 0.1);
+    color: var(--primary-color);
+    border-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--primary-color), #6c5ce7);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.tab-content {
+    background: white;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.tab-pane {
+    padding: 0;
+}
+
+/* Enhanced card styles for tabs */
+.notification-settings .card {
+    border: none;
+    box-shadow: var(--card-shadow);
+    border-radius: var(--border-radius);
+    transition: transform 0.2s ease;
+}
+
+.notification-settings .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.card .card-title {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Progress badge enhancement */
+#progress-badge {
+    background: linear-gradient(135deg, var(--secondary-color), #81C784) !important;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
 /* PWA specific styles */
 .install-prompt {
     position: fixed;

@@ -246,6 +246,39 @@ class KamenRunApp {
                 this.showQRModal('', 'import');
             });
         }
+
+        // Additional data management buttons
+        const resetProgressBtn = document.getElementById('reset-progress-btn');
+        const backupDataBtn = document.getElementById('backup-data-btn');
+        const viewStorageBtn = document.getElementById('view-storage-btn');
+        const testNotificationBtn = document.getElementById('test-notification');
+        
+        if (resetProgressBtn) {
+            resetProgressBtn.addEventListener('click', () => {
+                this.resetProgress();
+            });
+        }
+        
+        if (backupDataBtn) {
+            backupDataBtn.addEventListener('click', () => {
+                this.createBackup();
+            });
+        }
+        
+        if (viewStorageBtn) {
+            viewStorageBtn.addEventListener('click', () => {
+                this.showStorageInfo();
+            });
+        }
+        
+        if (testNotificationBtn) {
+            testNotificationBtn.addEventListener('click', () => {
+                this.sendTestNotification();
+            });
+        }
+
+        // Update notification status
+        this.updateNotificationStatus();
     }
 
     // PWA functionality
@@ -436,38 +469,28 @@ class KamenRunApp {
         return container;
     }
 
-    // QR Code Data Transfer System
+    // Optimized QR Code Data Transfer System (only user modifications)
     async exportDataAsQR() {
         try {
+            // Extract only user-modified data (completion status)
+            const userProgress = this.extractUserProgress();
+            
             const exportData = {
-                version: '1.0.0',
+                version: '2.0.0', // Updated version for new format
                 timestamp: new Date().toISOString(),
                 data: {
-                    runningScheduleData: this.currentData,
+                    progress: userProgress,
                     notificationTime: this.notificationTime,
                     currentProgress: localStorage.getItem('currentProgress') || '0'
                 }
             };
 
             const dataString = JSON.stringify(exportData);
+            console.log('Export data size:', dataString.length, 'characters');
             
-            // Check data size (QR codes have limits)
-            if (dataString.length > 2000) {
-                this.showToast('Data terlalu besar untuk QR code. Mencoba kompresi...', 'warning');
-                
-                // Compress data by removing unnecessary fields
-                const compressedData = this.compressExportData(exportData);
-                const compressedString = JSON.stringify(compressedData);
-                
-                if (compressedString.length > 2000) {
-                    this.showToast('Data masih terlalu besar. Silakan export per fase.', 'error');
-                    return;
-                }
-                
-                await this.generateQRCode(compressedString);
-            } else {
-                await this.generateQRCode(dataString);
-            }
+            // This should be much smaller now
+            await this.generateQRCode(dataString);
+            this.showToast(`Data berhasil diexport! (${dataString.length} karakter)`, 'success');
             
         } catch (error) {
             console.error('Export failed:', error);
@@ -475,30 +498,34 @@ class KamenRunApp {
         }
     }
 
-    compressExportData(data) {
-        // Remove completed tasks and keep only essential data
-        const compressed = {
-            v: data.version,
-            t: data.timestamp,
-            d: {
-                schedule: data.data.runningScheduleData.map(phase => ({
-                    name: phase.phaseName,
-                    weeks: phase.weeks.map(week => ({
-                        num: week.weekNumber,
-                        days: week.days.map(day => ({
-                            day: day.day.substring(0, 3), // Shorten day names
-                            task: day.task.length > 50 ? day.task.substring(0, 50) + '...' : day.task,
-                            done: day.done,
-                            icon: day.icon,
-                            rest: day.isRest
-                        }))
-                    }))
-                })),
-                notif: data.data.notificationTime,
-                progress: data.data.currentProgress
+    // Extract only the completion status and essential identifiers
+    extractUserProgress() {
+        const progress = {};
+        
+        this.currentData.forEach((phase, phaseIndex) => {
+            const phaseKey = `p${phaseIndex}`; // p0, p1, p2
+            progress[phaseKey] = {};
+            
+            phase.weeks.forEach((week, weekIndex) => {
+                const weekKey = `w${weekIndex}`; // w0, w1, w2...
+                
+                // Only store days that have been marked as done
+                const completedDays = week.days
+                    .map((day, dayIndex) => day.done ? dayIndex : null)
+                    .filter(index => index !== null);
+                
+                if (completedDays.length > 0) {
+                    progress[phaseKey][weekKey] = completedDays;
+                }
+            });
+            
+            // Remove phases with no progress
+            if (Object.keys(progress[phaseKey]).length === 0) {
+                delete progress[phaseKey];
             }
-        };
-        return compressed;
+        });
+        
+        return progress;
     }
 
     async generateQRCode(dataString) {
@@ -701,20 +728,45 @@ class KamenRunApp {
             // Try to parse and validate the data
             const parsedData = JSON.parse(data);
             
-            if (!parsedData.data || !parsedData.data.runningScheduleData) {
-                throw new Error('Format data tidak valid');
+            // Validate based on version
+            let phaseCount, taskCount = 0;
+            
+            if (parsedData.version === '2.0.0') {
+                // New optimized format
+                if (!parsedData.data || !parsedData.data.progress) {
+                    throw new Error('Format data progress tidak valid');
+                }
+                
+                // Count completed tasks
+                Object.keys(parsedData.data.progress).forEach(phaseKey => {
+                    Object.keys(parsedData.data.progress[phaseKey]).forEach(weekKey => {
+                        taskCount += parsedData.data.progress[phaseKey][weekKey].length;
+                    });
+                });
+                
+                phaseCount = Object.keys(parsedData.data.progress).length;
+                
+            } else {
+                // Legacy format
+                if (!parsedData.data || !parsedData.data.runningScheduleData) {
+                    throw new Error('Format data tidak valid');
+                }
+                phaseCount = parsedData.data.runningScheduleData.length;
             }
             
-            // Show preview
-            const phaseCount = parsedData.data.runningScheduleData.length;
             const notification = parsedData.data.notificationTime || 'Tidak diatur';
             const progress = parsedData.data.currentProgress || '0';
+            
+            const formatInfo = parsedData.version === '2.0.0' ? 
+                `<li><strong>Format:</strong> Optimized (v2.0) - ${taskCount} tugas selesai</li>` :
+                `<li><strong>Format:</strong> Legacy (v1.0) - Data lengkap</li>`;
             
             importResult.innerHTML = `
                 <div class="alert alert-success">
                     <h6><i class="fas fa-check-circle me-2"></i>Data Valid Ditemukan!</h6>
                     <ul class="mb-0">
-                        <li><strong>Jumlah Fase:</strong> ${phaseCount}</li>
+                        ${formatInfo}
+                        <li><strong>Fase dengan Progress:</strong> ${phaseCount}</li>
                         <li><strong>Waktu Notifikasi:</strong> ${notification}</li>
                         <li><strong>Progress:</strong> ${progress}%</li>
                         <li><strong>Timestamp:</strong> ${new Date(parsedData.timestamp).toLocaleString('id-ID')}</li>
@@ -752,32 +804,58 @@ class KamenRunApp {
                 throw new Error('QR code tidak valid atau rusak');
             }
             
-            // Validate data structure
-            if (!importData.data || !importData.data.runningScheduleData) {
-                throw new Error('Format data tidak sesuai');
+            // Validate data structure based on version
+            if (importData.version === '2.0.0') {
+                // New optimized format - only progress data
+                if (!importData.data || !importData.data.progress) {
+                    throw new Error('Format data progress tidak sesuai');
+                }
+                
+                // Backup current data
+                const backup = {
+                    data: this.currentData,
+                    notificationTime: this.notificationTime,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('kamenrun-backup', JSON.stringify(backup));
+                
+                // Apply progress to current schedule
+                this.applyUserProgress(importData.data.progress);
+                this.notificationTime = importData.data.notificationTime || '08:00';
+                
+                // Save imported data
+                this.saveData();
+                localStorage.setItem('notificationTime', this.notificationTime);
+                localStorage.setItem('currentProgress', importData.data.currentProgress || '0');
+                
+            } else {
+                // Legacy format (v1.0.0 or older) - full schedule data
+                if (!importData.data || !importData.data.runningScheduleData) {
+                    throw new Error('Format data tidak sesuai');
+                }
+                
+                // Convert compressed data back to full format if needed
+                if (importData.v) {
+                    importData = this.decompressImportData(importData);
+                }
+                
+                // Backup current data
+                const backup = {
+                    data: this.currentData,
+                    notificationTime: this.notificationTime,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('kamenrun-backup', JSON.stringify(backup));
+                
+                // Import full schedule data (legacy)
+                this.currentData = importData.data.runningScheduleData;
+                this.notificationTime = importData.data.notificationTime || '08:00';
+                
+                // Save imported data
+                this.saveData();
+                localStorage.setItem('notificationTime', this.notificationTime);
+                localStorage.setItem('currentProgress', importData.data.currentProgress || '0');
             }
-            
-            // Convert compressed data back to full format if needed
-            if (importData.v) {
-                importData = this.decompressImportData(importData);
-            }
-            
-            // Backup current data
-            const backup = {
-                data: this.currentData,
-                notificationTime: this.notificationTime,
-                timestamp: new Date().toISOString()
-            };
-            localStorage.setItem('kamenrun-backup', JSON.stringify(backup));
-            
-            // Import new data
-            this.currentData = importData.data.runningScheduleData;
-            this.notificationTime = importData.data.notificationTime || '08:00';
-            
-            // Save imported data
-            this.saveData();
-            localStorage.setItem('notificationTime', this.notificationTime);
-            localStorage.setItem('currentProgress', importData.data.currentProgress || '0');
             
             // Update UI
             this.populatePhaseSelect();
@@ -796,6 +874,41 @@ class KamenRunApp {
             console.error('Import failed:', error);
             this.showToast('Gagal import data: ' + error.message, 'error');
         }
+    }
+
+    // Apply user progress to the default schedule
+    applyUserProgress(progressData) {
+        // Reset all completion status first
+        this.currentData.forEach(phase => {
+            phase.weeks.forEach(week => {
+                week.days.forEach(day => {
+                    day.done = false;
+                });
+            });
+        });
+        
+        // Apply imported progress
+        Object.keys(progressData).forEach(phaseKey => {
+            const phaseIndex = parseInt(phaseKey.substring(1)); // p0 -> 0
+            
+            if (this.currentData[phaseIndex]) {
+                const weekData = progressData[phaseKey];
+                
+                Object.keys(weekData).forEach(weekKey => {
+                    const weekIndex = parseInt(weekKey.substring(1)); // w0 -> 0
+                    
+                    if (this.currentData[phaseIndex].weeks[weekIndex]) {
+                        const completedDays = weekData[weekKey];
+                        
+                        completedDays.forEach(dayIndex => {
+                            if (this.currentData[phaseIndex].weeks[weekIndex].days[dayIndex]) {
+                                this.currentData[phaseIndex].weeks[weekIndex].days[dayIndex].done = true;
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     decompressImportData(compressed) {
@@ -834,6 +947,229 @@ class KamenRunApp {
             'Min': 'Minggu'
         };
         return dayMap[shortDay] || shortDay;
+    }
+
+    // Additional data management methods
+    resetProgress() {
+        if (confirm('Apakah Anda yakin ingin mereset semua progress? Tindakan ini tidak dapat dibatalkan.')) {
+            // Reset all completion status
+            this.currentData.forEach(phase => {
+                phase.weeks.forEach(week => {
+                    week.days.forEach(day => {
+                        day.done = false;
+                    });
+                });
+            });
+            
+            // Save reset data
+            this.saveData();
+            localStorage.setItem('currentProgress', '0');
+            
+            // Update UI
+            this.populatePhaseSelect();
+            this.populateWeekSelect(0);
+            this.renderSchedule(0, 0);
+            
+            this.showToast('Progress berhasil direset! 🔄', 'warning');
+        }
+    }
+
+    createBackup() {
+        try {
+            const backup = {
+                version: '2.0.0',
+                timestamp: new Date().toISOString(),
+                type: 'backup',
+                data: {
+                    runningScheduleData: this.currentData,
+                    notificationTime: this.notificationTime,
+                    currentProgress: localStorage.getItem('currentProgress') || '0'
+                }
+            };
+
+            const backupString = JSON.stringify(backup, null, 2);
+            const blob = new Blob([backupString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `kamenrun-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showToast('Backup berhasil diunduh! 💾', 'success');
+        } catch (error) {
+            console.error('Backup failed:', error);
+            this.showToast('Gagal membuat backup: ' + error.message, 'error');
+        }
+    }
+
+    showStorageInfo() {
+        try {
+            // Calculate storage usage
+            const scheduleData = JSON.stringify(this.currentData);
+            const scheduleSize = new Blob([scheduleData]).size;
+            
+            const notificationTime = this.notificationTime;
+            const currentProgress = localStorage.getItem('currentProgress') || '0';
+            
+            // Count tasks
+            let totalTasks = 0;
+            let completedTasks = 0;
+            
+            this.currentData.forEach(phase => {
+                phase.weeks.forEach(week => {
+                    week.days.forEach(day => {
+                        if (!day.isRest || !day.task.toLowerCase().includes('istirahat')) {
+                            totalTasks++;
+                            if (day.done) {
+                                completedTasks++;
+                            }
+                        }
+                    });
+                });
+            });
+
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-hdd me-2"></i>
+                                Informasi Storage
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-database me-2"></i>Data Storage</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Schedule Data:</strong> ${(scheduleSize / 1024).toFixed(2)} KB</li>
+                                        <li><strong>Notification Time:</strong> ${notificationTime}</li>
+                                        <li><strong>Overall Progress:</strong> ${currentProgress}%</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-chart-pie me-2"></i>Progress Statistics</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Total Tasks:</strong> ${totalTasks}</li>
+                                        <li><strong>Completed:</strong> ${completedTasks}</li>
+                                        <li><strong>Remaining:</strong> ${totalTasks - completedTasks}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <small>
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Data disimpan secara lokal di browser Anda menggunakan localStorage.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            
+            modal.addEventListener('hidden.bs.modal', () => {
+                modal.remove();
+            });
+            
+        } catch (error) {
+            console.error('Storage info failed:', error);
+            this.showToast('Gagal menampilkan info storage: ' + error.message, 'error');
+        }
+    }
+
+    sendTestNotification() {
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+                this.sendDirectNotification();
+                this.showToast('Test notifikasi berhasil dikirim! 🔔', 'success');
+            } else if (Notification.permission === 'denied') {
+                this.showToast('Notifikasi diblokir. Silakan aktifkan di pengaturan browser.', 'error');
+            } else {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        this.sendDirectNotification();
+                        this.showToast('Test notifikasi berhasil dikirim! 🔔', 'success');
+                    } else {
+                        this.showToast('Izin notifikasi ditolak.', 'error');
+                    }
+                });
+            }
+        } else {
+            this.showToast('Browser tidak mendukung notifikasi.', 'error');
+        }
+    }
+
+    updateNotificationStatus() {
+        const statusElement = document.getElementById('notification-status');
+        if (!statusElement) return;
+
+        let statusHTML = '';
+        
+        if ('Notification' in window) {
+            const permission = Notification.permission;
+            let statusClass = '';
+            let statusIcon = '';
+            let statusText = '';
+            
+            switch (permission) {
+                case 'granted':
+                    statusClass = 'success';
+                    statusIcon = 'fas fa-check-circle';
+                    statusText = 'Aktif - Notifikasi diizinkan';
+                    break;
+                case 'denied':
+                    statusClass = 'danger';
+                    statusIcon = 'fas fa-times-circle';
+                    statusText = 'Diblokir - Aktifkan di pengaturan browser';
+                    break;
+                default:
+                    statusClass = 'warning';
+                    statusIcon = 'fas fa-exclamation-triangle';
+                    statusText = 'Pending - Belum ada izin';
+            }
+            
+            statusHTML += `
+                <div class="alert alert-${statusClass}">
+                    <i class="${statusIcon} me-2"></i>
+                    <strong>Status:</strong> ${statusText}
+                </div>
+            `;
+            
+            // Service Worker status
+            if ('serviceWorker' in navigator) {
+                statusHTML += `
+                    <div class="alert alert-info">
+                        <i class="fas fa-cog me-2"></i>
+                        <strong>Service Worker:</strong> ${navigator.serviceWorker.controller ? 'Aktif' : 'Tidak aktif'}
+                    </div>
+                `;
+            }
+            
+        } else {
+            statusHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <strong>Tidak Didukung:</strong> Browser tidak mendukung notifikasi
+                </div>
+            `;
+        }
+        
+        statusElement.innerHTML = statusHTML;
     }
 }
 
