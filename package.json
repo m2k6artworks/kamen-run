@@ -1,1 +1,41 @@
- 
+{
+  "name": "kamen-run",
+  "version": "1.0.0",
+  "description": "Your personal running journey companion from zero to half marathon",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 3000 -c-1",
+    "dev": "npx live-server --port=3000 --no-browser",
+    "build": "echo 'Building PWA...' && npm run validate",
+    "validate": "npx pwa-asset-generator --help || echo 'Install pwa-asset-generator globally: npm install -g pwa-asset-generator'",
+    "generate-icons": "npx pwa-asset-generator logo.png icons --manifest manifest.json --index index.html",
+    "test-pwa": "npx lighthouse http://localhost:3000 --view",
+    "deploy": "echo 'Ready for deployment! Upload all files to your web server.'"
+  },
+  "keywords": [
+    "running",
+    "fitness",
+    "training",
+    "pwa",
+    "schedule",
+    "tracker",
+    "half-marathon"
+  ],
+  "author": "KamenRun Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/kamen-run.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/kamen-run/issues"
+  },
+  "homepage": "https://yourusername.github.io/kamen-run",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
