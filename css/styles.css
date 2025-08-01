@@ -313,6 +313,10 @@ body {
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
+    body {
+        padding: 10px 0;
+    }
+    
     .header-section h1 {
         font-size: 2rem;
     }
@@ -325,10 +329,125 @@ body {
     .day-card {
         padding: 1rem;
     }
+    
+    .main-container {
+        margin: 0 10px;
+        border-radius: 16px;
+    }
+    
+    .progress-section,
+    .notification-settings {
+        margin: 1rem;
+        border-radius: 12px;
+    }
+    
+    /* Show bottom nav on mobile */
+    .bottom-nav {
+        display: flex;
+    }
+    
+    /* Hide desktop tabs on mobile */
+    .tabs-section {
+        display: none;
+    }
+    
+    .tab-content {
+        margin-bottom: 80px;
+    }
+    
+    /* Mobile-specific card styling */
+    .card {
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    /* Mobile button styling */
+    .btn-custom {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
 }
 
-/* Tabs styling */
+/* Desktop styles */
+@media (min-width: 769px) {
+    .bottom-nav {
+        display: none;
+    }
+    
+    .tabs-section {
+        display: block;
+    }
+    
+    .tab-content {
+        margin-bottom: 0;
+    }
+}
+
+/* Mobile-first bottom navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem 0;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-top: 1px solid #f0f0f0;
+}
+
+.bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    min-width: 60px;
+}
+
+.bottom-nav .nav-item i {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+    color: #999;
+    transition: all 0.3s ease;
+}
+
+.bottom-nav .nav-item span {
+    font-size: 0.75rem;
+    color: #999;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.bottom-nav .nav-item.active {
+    background: linear-gradient(135deg, var(--primary-color), #6c5ce7);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.bottom-nav .nav-item.active i,
+.bottom-nav .nav-item.active span {
+    color: white;
+}
+
+.bottom-nav .nav-item:hover:not(.active) {
+    background: rgba(248, 79, 72, 0.1);
+}
+
+.bottom-nav .nav-item:hover:not(.active) i,
+.bottom-nav .nav-item:hover:not(.active) span {
+    color: var(--primary-color);
+}
+
+/* Desktop tabs styling (hidden on mobile) */
 .tabs-section {
+    display: none;
     background: white;
     border-radius: var(--border-radius);
     margin: 1.5rem;
@@ -356,21 +475,22 @@ body {
 }
 
 .nav-tabs .nav-link:hover {
-    background: rgba(0, 123, 255, 0.1);
+    background: rgba(248, 79, 72, 0.1);
     color: var(--primary-color);
     border-color: transparent;
 }
 
 .nav-tabs .nav-link.active {
-    background: linear-gradient(135deg, var(--primary-color), #6c5ce7);
+    background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
     color: white;
     border-color: transparent;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(248, 79, 72, 0.3);
 }
 
 .tab-content {
     background: white;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    border-radius: var(--border-radius);
+    margin-bottom: 80px; /* Space for bottom nav */
 }
 
 .tab-pane {

@@ -2,7 +2,7 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>KamenRun - Your Running Journey Companion</title>
 
     <!-- SEO Meta Tags -->
@@ -33,7 +33,9 @@
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-16x16.png">
+    <link rel="manifest" href="./site.webmanifest">
     <link rel="mask-icon" href="./icons/safari-pinned-tab.svg" color="#007BFF">
+    <link rel="icon" href="./icons/favicon.ico">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
@@ -87,7 +89,7 @@
     <link rel="apple-touch-startup-image" href="icons/apple-splash-640-1136.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     <link rel="apple-touch-startup-image" href="icons/apple-splash-1136-640.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
   </head>
-  <body>
+  <body class="p-0 p-md-2">
 
     <!-- Offline Indicator -->
     <div class="offline-indicator">
@@ -96,44 +98,20 @@
     </div>
     <div class="container-fluid">
       <div class="row justify-content-center">
-        <div class="col-12 col-lg-10 col-xl-8">
-          <div class="main-container">
+        <div class="col-12 col-lg-10 col-xl-8 p-0 p-md-4">
+          <div class="main-container m-0">
 
             <!-- Header Section -->
             <header class="header-section">
               <div class="d-flex align-items-center justify-content-center mb-3">
                 <i class="fas fa-running fa-3x me-3"></i>
-                <h1 class="mb-0">🏃‍♂️ KamenRun</h1>
+                <h1 class="mb-0">KamenRun</h1>
               </div>
               <p class="motivation-text mb-0" id="motivation">Loading motivation...</p>
             </header>
 
-            <!-- Navigation Tabs -->
-            <section class="tabs-section mb-4">
-              <ul class="nav nav-tabs nav-fill" id="mainTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule-panel" type="button" role="tab">
-                    <i class="fas fa-calendar-alt me-2"></i>
-                    Schedule
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-panel" type="button" role="tab">
-                    <i class="fas fa-bell me-2"></i>
-                    Notification
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-panel" type="button" role="tab">
-                    <i class="fas fa-database me-2"></i>
-                    Data
-                  </button>
-                </li>
-              </ul>
-            </section>
-
             <!-- Tab Content -->
-            <div class="tab-content" id="mainTabContent">
+            <div class="tab-content mb-0" id="mainTabContent">
 
               <!-- Schedule Tab -->
               <div class="tab-pane fade show active" id="schedule-panel" role="tabpanel">
@@ -145,7 +123,8 @@
                       <i class="fas fa-chart-line text-primary me-2"></i>
                       Progress Fase Ini
                     </h3>
-                    <span class="badge bg-primary fs-6" id="progress-badge">0%</span>
+
+                    <!-- <span class="badge bg-primary fs-6" id="progress-badge">0%</span> -->
                   </div>
                   <div class="progress-bar-custom">
                     <div class="progress-bar-fill" id="progressBar">0%</div>
@@ -321,7 +300,7 @@
             </div>
 
             <!-- Footer Section -->
-            <footer class="footer-section">
+            <footer class="footer-section mb-5 pb-5">
               <div class="row">
                 <div class="col-12 text-center">
                   <p class="mb-2">
@@ -338,11 +317,11 @@
                     </small>
                   </p>
                   <div class="mt-3">
-                    <button class="btn btn-outline-primary btn-sm me-2" onclick="location.reload()">
+                    <button class="btn btn-outline-primary me-2" onclick="location.reload()">
                       <i class="fas fa-sync-alt me-1"></i>
                       Refresh Data
                     </button>
-                    <button class="btn btn-outline-success btn-sm" id="share-progress">
+                    <button class="btn btn-outline-success" id="share-progress">
                       <i class="fas fa-share-alt me-1"></i>
                       Bagikan Progress
                     </button>
@@ -351,6 +330,22 @@
               </div>
             </footer>
           </div>
+
+          <!-- Bottom Navigation (Mobile App Style) -->
+          <nav class="bottom-nav">
+            <div class="nav-item active" data-tab="schedule-panel">
+              <i class="fas fa-calendar-alt"></i>
+              <span>Schedule</span>
+            </div>
+            <div class="nav-item" data-tab="notification-panel">
+              <i class="fas fa-bell"></i>
+              <span>Notification</span>
+            </div>
+            <div class="nav-item" data-tab="data-panel">
+              <i class="fas fa-database"></i>
+              <span>Data</span>
+            </div>
+          </nav>
         </div>
       </div>
     </div>

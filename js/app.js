@@ -279,6 +279,9 @@ class KamenRunApp {
 
         // Update notification status
         this.updateNotificationStatus();
+
+        // Setup bottom navigation for mobile
+        this.setupBottomNavigation();
     }
 
     // PWA functionality
@@ -1410,6 +1413,42 @@ class KamenRunApp {
         }
         
         statusElement.innerHTML = statusHTML;
+    }
+
+    // Bottom navigation functionality
+    setupBottomNavigation() {
+        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetTab = item.getAttribute('data-tab');
+                
+                // Update active nav item
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Show target tab
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+                
+                const targetPane = document.getElementById(targetTab);
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                }
+                
+                // Update progress if switching to schedule tab
+                if (targetTab === 'schedule-panel') {
+                    this.updateProgress(this.phaseSelect.value);
+                }
+                
+                // Update notification status if switching to notification tab
+                if (targetTab === 'notification-panel') {
+                    this.updateNotificationStatus();
+                }
+            });
+        });
     }
 }
 
