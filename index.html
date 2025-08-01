@@ -110,210 +110,214 @@
 
             <!-- Navigation Tabs -->
             <section class="tabs-section mb-4">
-                <ul class="nav nav-tabs nav-fill" id="mainTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule-panel" type="button" role="tab">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            Schedule
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-panel" type="button" role="tab">
-                            <i class="fas fa-bell me-2"></i>
-                            Notification
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-panel" type="button" role="tab">
-                            <i class="fas fa-database me-2"></i>
-                            Data
-                        </button>
-                    </li>
-                </ul>
+              <ul class="nav nav-tabs nav-fill" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule-panel" type="button" role="tab">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Schedule
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-panel" type="button" role="tab">
+                    <i class="fas fa-bell me-2"></i>
+                    Notification
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-panel" type="button" role="tab">
+                    <i class="fas fa-database me-2"></i>
+                    Data
+                  </button>
+                </li>
+              </ul>
             </section>
 
             <!-- Tab Content -->
             <div class="tab-content" id="mainTabContent">
-                <!-- Schedule Tab -->
-                <div class="tab-pane fade show active" id="schedule-panel" role="tabpanel">
-                    <!-- Progress Section -->
-                    <section class="progress-section">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h3 class="mb-0">
-                                <i class="fas fa-chart-line text-primary me-2"></i>
-                                Progress Fase Ini
-                            </h3>
-                            <span class="badge bg-primary fs-6" id="progress-badge">0%</span>
-                        </div>
-                        <div class="progress-bar-custom">
-                            <div class="progress-bar-fill" id="progressBar">0%</div>
-                        </div>
-                    </section>
 
-                    <!-- Controls Section -->
-                    <section class="controls-section">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="phase-select" class="form-label">
-                                    <i class="fas fa-layer-group text-primary me-1"></i>
-                                    Pilih Fase Training
-                                </label>
-                                <select class="form-select" id="phase-select">
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
+              <!-- Schedule Tab -->
+              <div class="tab-pane fade show active" id="schedule-panel" role="tabpanel">
+
+                <!-- Progress Section -->
+                <section class="progress-section">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h3 class="mb-0">
+                      <i class="fas fa-chart-line text-primary me-2"></i>
+                      Progress Fase Ini
+                    </h3>
+                    <span class="badge bg-primary fs-6" id="progress-badge">0%</span>
+                  </div>
+                  <div class="progress-bar-custom">
+                    <div class="progress-bar-fill" id="progressBar">0%</div>
+                  </div>
+                </section>
+
+                <!-- Controls Section -->
+                <section class="controls-section">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="phase-select" class="form-label">
+                        <i class="fas fa-layer-group text-primary me-1"></i>
+                        Pilih Fase Training
+                      </label>
+                      <select class="form-select" id="phase-select">
+
+                        <!-- Options will be populated by JavaScript -->
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="week-select" class="form-label">
+                        <i class="fas fa-calendar-week text-success me-1"></i>
+                        Pilih Minggu
+                      </label>
+                      <select class="form-select" id="week-select">
+
+                        <!-- Options will be populated by JavaScript -->
+                      </select>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Schedule Grid -->
+                <main class="schedule-grid" id="schedule-container">
+
+                  <!-- Schedule cards will be populated by JavaScript -->
+                </main>
+              </div>
+
+              <!-- Notification Tab -->
+              <div class="tab-pane fade" id="notification-panel" role="tabpanel">
+                <section class="notification-settings">
+                  <h4 class="mb-4">
+                    <i class="fas fa-bell text-warning me-2"></i>
+                    Pengaturan Notifikasi
+                  </h4>
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h6 class="card-title">
+                        <i class="fas fa-clock me-2"></i>
+                        Jadwal Pengingat Harian
+                      </h6>
+                      <div class="row align-items-center">
+                        <div class="col-md-6">
+                          <label for="notification-time" class="form-label">Waktu Pengingat</label>
+                          <input type="time" class="form-control" id="notification-time" value="08:00">
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                          <button class="btn btn-success-custom btn-custom w-100" id="save-notification">
+                            <i class="fas fa-save me-2"></i>
+                            Simpan Pengaturan
+                          </button>
+                        </div>
+                      </div>
+                      <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Notifikasi akan mengingatkan Anda untuk menjalankan jadwal latihan setiap hari, bahkan ketika aplikasi ditutup.</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-body">
+                      <h6 class="card-title">
+                        <i class="fas fa-cog me-2"></i>
+                        Status Notifikasi
+                      </h6>
+                      <div id="notification-status" class="mt-3">
+
+                        <!-- Status will be populated by JavaScript -->
+                      </div>
+                      <button class="btn btn-outline-primary btn-sm mt-3" id="test-notification">
+                        <i class="fas fa-vial me-2"></i>
+                        Test Notifikasi
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <!-- Data Tab -->
+              <div class="tab-pane fade" id="data-panel" role="tabpanel">
+                <section class="notification-settings">
+                  <h4 class="mb-4">
+                    <i class="fas fa-database text-info me-2"></i>
+                    Manajemen Data
+                  </h4>
+
+                  <!-- Data Transfer Section -->
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h6 class="card-title">
+                        <i class="fas fa-exchange-alt me-2"></i>
+                        Transfer Data Antar Browser
+                      </h6>
+                      <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <div class="card h-100 border-primary">
+                            <div class="card-body text-center">
+                              <i class="fas fa-qrcode fa-3x text-primary mb-3"></i>
+                              <h6 class="card-title">Export Progress</h6>
+                              <p class="card-text small">Buat QR code dari progress Anda (hanya data yang sudah dikerjakan)</p>
+                              <button class="btn btn-primary btn-custom" id="export-qr-btn">
+                                <i class="fas fa-download me-2"></i>
+                                Export ke QR Code
+                              </button>
                             </div>
-                            <div class="col-md-6">
-                                <label for="week-select" class="form-label">
-                                    <i class="fas fa-calendar-week text-success me-1"></i>
-                                    Pilih Minggu
-                                </label>
-                                <select class="form-select" id="week-select">
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
-                            </div>
+                          </div>
                         </div>
-                    </section>
-
-                    <!-- Schedule Grid -->
-                    <main class="schedule-grid" id="schedule-container">
-                        <!-- Schedule cards will be populated by JavaScript -->
-                    </main>
-                </div>
-
-                <!-- Notification Tab -->
-                <div class="tab-pane fade" id="notification-panel" role="tabpanel">
-                    <section class="notification-settings">
-                        <h4 class="mb-4">
-                            <i class="fas fa-bell text-warning me-2"></i>
-                            Pengaturan Notifikasi
-                        </h4>
-                        
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h6 class="card-title">
-                                    <i class="fas fa-clock me-2"></i>
-                                    Jadwal Pengingat Harian
-                                </h6>
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <label for="notification-time" class="form-label">Waktu Pengingat</label>
-                                        <input type="time" class="form-control" id="notification-time" value="08:00">
-                                    </div>
-                                    <div class="col-md-6 mt-3 mt-md-0">
-                                        <button class="btn btn-success-custom btn-custom w-100" id="save-notification">
-                                            <i class="fas fa-save me-2"></i>
-                                            Simpan Pengaturan
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="alert alert-info mt-3">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <small>Notifikasi akan mengingatkan Anda untuk menjalankan jadwal latihan setiap hari, bahkan ketika aplikasi ditutup.</small>
-                                </div>
+                        <div class="col-md-6 mb-3">
+                          <div class="card h-100 border-success">
+                            <div class="card-body text-center">
+                              <i class="fas fa-camera fa-3x text-success mb-3"></i>
+                              <h6 class="card-title">Import Progress</h6>
+                              <p class="card-text small">Scan QR code untuk import progress dari browser lain</p>
+                              <button class="btn btn-success-custom btn-custom" id="import-qr-btn">
+                                <i class="fas fa-upload me-2"></i>
+                                Import dari QR Code
+                              </button>
                             </div>
+                          </div>
                         </div>
+                      </div>
+                      <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <small>
+                          <strong>Format Baru:</strong> Hanya progress yang sudah dikerjakan yang akan diexport/import (ukuran data jauh lebih kecil).
+                        </small>
+                      </div>
+                    </div>
+                  </div>
 
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title">
-                                    <i class="fas fa-cog me-2"></i>
-                                    Status Notifikasi
-                                </h6>
-                                <div id="notification-status" class="mt-3">
-                                    <!-- Status will be populated by JavaScript -->
-                                </div>
-                                <button class="btn btn-outline-primary btn-sm mt-3" id="test-notification">
-                                    <i class="fas fa-vial me-2"></i>
-                                    Test Notifikasi
-                                </button>
-                            </div>
+                  <!-- Data Management Section -->
+                  <div class="card">
+                    <div class="card-body">
+                      <h6 class="card-title">
+                        <i class="fas fa-tools me-2"></i>
+                        Pengelolaan Data Lokal
+                      </h6>
+                      <div class="row">
+                        <div class="col-md-4 mb-3">
+                          <button class="btn btn-outline-warning w-100" id="reset-progress-btn">
+                            <i class="fas fa-undo me-2"></i>
+                            Reset Progress
+                          </button>
                         </div>
-                    </section>
-                </div>
-
-                <!-- Data Tab -->
-                <div class="tab-pane fade" id="data-panel" role="tabpanel">
-                    <section class="notification-settings">
-                        <h4 class="mb-4">
-                            <i class="fas fa-database text-info me-2"></i>
-                            Manajemen Data
-                        </h4>
-
-                        <!-- Data Transfer Section -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h6 class="card-title">
-                                    <i class="fas fa-exchange-alt me-2"></i>
-                                    Transfer Data Antar Browser
-                                </h6>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card h-100 border-primary">
-                                            <div class="card-body text-center">
-                                                <i class="fas fa-qrcode fa-3x text-primary mb-3"></i>
-                                                <h6 class="card-title">Export Progress</h6>
-                                                <p class="card-text small">Buat QR code dari progress Anda (hanya data yang sudah dikerjakan)</p>
-                                                <button class="btn btn-primary btn-custom" id="export-qr-btn">
-                                                    <i class="fas fa-download me-2"></i>
-                                                    Export ke QR Code
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card h-100 border-success">
-                                            <div class="card-body text-center">
-                                                <i class="fas fa-camera fa-3x text-success mb-3"></i>
-                                                <h6 class="card-title">Import Progress</h6>
-                                                <p class="card-text small">Scan QR code untuk import progress dari browser lain</p>
-                                                <button class="btn btn-success-custom btn-custom" id="import-qr-btn">
-                                                    <i class="fas fa-upload me-2"></i>
-                                                    Import dari QR Code
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="alert alert-info">
-                                    <i class="fas fa-lightbulb me-2"></i>
-                                    <small>
-                                        <strong>Format Baru:</strong> Hanya progress yang sudah dikerjakan yang akan diexport/import (ukuran data jauh lebih kecil).
-                                    </small>
-                                </div>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                          <button class="btn btn-outline-info w-100" id="backup-data-btn">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Backup Data
+                          </button>
                         </div>
-
-                        <!-- Data Management Section -->
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title">
-                                    <i class="fas fa-tools me-2"></i>
-                                    Pengelolaan Data Lokal
-                                </h6>
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <button class="btn btn-outline-warning w-100" id="reset-progress-btn">
-                                            <i class="fas fa-undo me-2"></i>
-                                            Reset Progress
-                                        </button>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <button class="btn btn-outline-info w-100" id="backup-data-btn">
-                                            <i class="fas fa-shield-alt me-2"></i>
-                                            Backup Data
-                                        </button>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <button class="btn btn-outline-secondary w-100" id="view-storage-btn">
-                                            <i class="fas fa-hdd me-2"></i>
-                                            Info Storage
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                          <button class="btn btn-outline-secondary w-100" id="view-storage-btn">
+                            <i class="fas fa-hdd me-2"></i>
+                            Info Storage
+                          </button>
                         </div>
-                    </section>
-                </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
             </div>
 
             <!-- Footer Section -->
@@ -354,12 +358,12 @@
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 
-        <!-- Bootstrap 5 JavaScript -->
+    <!-- Bootstrap 5 JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- jsQR Library for QR Code Scanning -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    
+
     <!-- Custom JavaScript -->
     <script src="./js/app.js"></script>
 
