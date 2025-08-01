@@ -8,7 +8,7 @@
     "dev": "npx live-server --port=3000 --no-browser",
     "build": "echo 'Building PWA...' && npm run validate",
     "validate": "npx pwa-asset-generator --help || echo 'Install pwa-asset-generator globally: npm install -g pwa-asset-generator'",
-    "generate-icons": "npx pwa-asset-generator logo.png icons --manifest manifest.json --index index.html",
+    "generate-icons": "npx pwa-asset-generator ./icons/logo.png ./icons --manifest manifest.json --index index.html",
     "test-pwa": "npx lighthouse http://localhost:3000 --view",
     "deploy": "echo 'Ready for deployment! Upload all files to your web server.'"
   },
@@ -25,7 +25,7 @@
   "license": "MIT",
   "devDependencies": {
     "http-server": "^14.1.1",
-    "live-server": "^1.2.2"
+    "live-server": "^1.2.0"
   },
   "repository": {
     "type": "git",
@@ -38,4 +38,4 @@
   "engines": {
     "node": ">=14.0.0"
   }
-} 
+}

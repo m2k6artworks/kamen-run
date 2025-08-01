@@ -1,177 +1,219 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KamenRun - Your Running Journey Companion</title>
-    
+
     <!-- SEO Meta Tags -->
     <meta name="description" content="KamenRun is your personal running journey companion from zero to half marathon. Track your progress, follow expert training plans, and achieve your running goals.">
     <meta name="keywords" content="running, training, schedule, half marathon, fitness, exercise, kamen run">
     <meta name="author" content="KamenRun">
-    
+
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="KamenRun - Your Running Journey Companion">
     <meta property="og:description" content="From zero to half marathon in one year. Expert-backed training plans for beginners.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://yourdomain.com">
     <meta property="og:image" content="./images/og-image.png">
-    
+
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="KamenRun - Your Running Journey Companion">
     <meta name="twitter:description" content="From zero to half marathon in one year. Expert-backed training plans for beginners.">
     <meta name="twitter:image" content="./images/twitter-image.png">
-    
+
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#007BFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="KamenRun">
     <meta name="msapplication-TileColor" content="#007BFF">
     <meta name="msapplication-config" content="./browserconfig.xml">
-    
+
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180x180.png">
     <link rel="mask-icon" href="./icons/safari-pinned-tab.svg" color="#007BFF">
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./css/styles.css">
-</head>
-<body>
+    <link rel="apple-touch-icon" href="icons/apple-icon-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2388-1668.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1536-2048.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2048-1536.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1640-2360.jpg" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2360-1640.jpg" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1668-2224.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2224-1668.jpg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1620-2160.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2160-1620.jpg" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1488-2266.jpg" media="(device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2266-1488.jpg" media="(device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1320-2868.jpg" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2868-1320.jpg" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1206-2622.jpg" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2622-1206.jpg" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1290-2796.jpg" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2796-1290.jpg" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1179-2556.jpg" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2556-1179.jpg" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1170-2532.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2532-1170.jpg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1284-2778.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2778-1284.jpg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1125-2436.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2436-1125.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1242-2688.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2688-1242.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-828-1792.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1792-828.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1242-2208.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2208-1242.jpg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-750-1334.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1334-750.jpg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-640-1136.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1136-640.jpg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
+  </head>
+  <body>
+
     <!-- Offline Indicator -->
     <div class="offline-indicator">
-        <i class="fas fa-wifi-slash me-2"></i>
-        <span>Anda sedang offline. Data akan disinkronkan saat online kembali.</span>
+      <i class="fas fa-wifi-slash me-2"></i>
+      <span>Anda sedang offline. Data akan disinkronkan saat online kembali.</span>
     </div>
-
     <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 col-xl-8">
-                <div class="main-container">
-                    <!-- Header Section -->
-                    <header class="header-section">
-                        <div class="d-flex align-items-center justify-content-center mb-3">
-                            <i class="fas fa-running fa-3x me-3"></i>
-                            <h1 class="mb-0">🏃‍♂️ KamenRun</h1>
-                        </div>
-                        <p class="motivation-text mb-0" id="motivation">Loading motivation...</p>
-                    </header>
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+          <div class="main-container">
 
-                    <!-- Progress Section -->
-                    <section class="progress-section">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h3 class="mb-0">
-                                <i class="fas fa-chart-line text-primary me-2"></i>
-                                Progress Fase Ini
-                            </h3>
-                            <span class="badge bg-primary fs-6" id="progress-badge">0%</span>
-                        </div>
-                        <div class="progress-bar-custom">
-                            <div class="progress-bar-fill" id="progressBar">0%</div>
-                        </div>
-                    </section>
+            <!-- Header Section -->
+            <header class="header-section">
+              <div class="d-flex align-items-center justify-content-center mb-3">
+                <i class="fas fa-running fa-3x me-3"></i>
+                <h1 class="mb-0">🏃‍♂️ KamenRun</h1>
+              </div>
+              <p class="motivation-text mb-0" id="motivation">Loading motivation...</p>
+            </header>
 
-                    <!-- Notification Settings -->
-                    <section class="notification-settings">
-                        <h4 class="mb-3">
-                            <i class="fas fa-bell text-warning me-2"></i>
-                            Pengaturan Notifikasi
-                        </h4>
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <label for="notification-time" class="form-label">
-                                    <i class="fas fa-clock me-1"></i>
-                                    Waktu Pengingat Harian
-                                </label>
-                                <input type="time" class="form-control" id="notification-time" value="08:00">
-                            </div>
-                            <div class="col-md-6 mt-3 mt-md-0">
-                                <button class="btn btn-success-custom btn-custom w-100" id="save-notification">
-                                    <i class="fas fa-save me-2"></i>
-                                    Simpan Pengaturan
-                                </button>
-                            </div>
-                        </div>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Notifikasi akan mengingatkan Anda untuk menjalankan jadwal latihan setiap hari.
-                        </small>
-                    </section>
+            <!-- Progress Section -->
+            <section class="progress-section">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="mb-0">
+                  <i class="fas fa-chart-line text-primary me-2"></i>
+                  Progress Fase Ini
+                </h3>
+                <span class="badge bg-primary fs-6" id="progress-badge">0%</span>
+              </div>
+              <div class="progress-bar-custom">
+                <div class="progress-bar-fill" id="progressBar">0%</div>
+              </div>
+            </section>
 
-                    <!-- Controls Section -->
-                    <section class="controls-section">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="phase-select" class="form-label">
-                                    <i class="fas fa-layer-group text-primary me-1"></i>
-                                    Pilih Fase Training
-                                </label>
-                                <select class="form-select" id="phase-select">
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="week-select" class="form-label">
-                                    <i class="fas fa-calendar-week text-success me-1"></i>
-                                    Pilih Minggu
-                                </label>
-                                <select class="form-select" id="week-select">
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Schedule Grid -->
-                    <main class="schedule-grid" id="schedule-container">
-                        <!-- Schedule cards will be populated by JavaScript -->
-                    </main>
-
-                    <!-- Footer Section -->
-                    <footer class="footer-section">
-                        <div class="row">
-                            <div class="col-12 text-center">
-                                <p class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    Centang jadwal untuk menyimpan progres. Data tersimpan di browser Anda.
-                                </p>
-                                <p class="mb-0">
-                                    <small class="text-muted">
-                                        Training plan berdasarkan podcast 
-                                        <a href="https://www.youtube.com/watch?v=nogKhQBu12A" target="_blank" class="text-decoration-none">
-                                            Dr. Tirta & Coach Latief Nurarifin
-                                            <i class="fas fa-external-link-alt ms-1"></i>
-                                        </a>
-                                    </small>
-                                </p>
-                                <div class="mt-3">
-                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="location.reload()">
-                                        <i class="fas fa-sync-alt me-1"></i>
-                                        Refresh Data
-                                    </button>
-                                    <button class="btn btn-outline-success btn-sm" id="share-progress">
-                                        <i class="fas fa-share-alt me-1"></i>
-                                        Bagikan Progress
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </footer>
+            <!-- Notification Settings -->
+            <section class="notification-settings">
+              <h4 class="mb-3">
+                <i class="fas fa-bell text-warning me-2"></i>
+                Pengaturan Notifikasi
+              </h4>
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <label for="notification-time" class="form-label">
+                    <i class="fas fa-clock me-1"></i>
+                    Waktu Pengingat Harian
+                  </label>
+                  <input type="time" class="form-control" id="notification-time" value="08:00">
                 </div>
-            </div>
+                <div class="col-md-6 mt-3 mt-md-0">
+                  <button class="btn btn-success-custom btn-custom w-100" id="save-notification">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan Pengaturan
+                  </button>
+                </div>
+              </div>
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Notifikasi akan mengingatkan Anda untuk menjalankan jadwal latihan setiap hari.
+              </small>
+            </section>
+
+            <!-- Controls Section -->
+            <section class="controls-section">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="phase-select" class="form-label">
+                    <i class="fas fa-layer-group text-primary me-1"></i>
+                    Pilih Fase Training
+                  </label>
+                  <select class="form-select" id="phase-select">
+
+                    <!-- Options will be populated by JavaScript -->
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="week-select" class="form-label">
+                    <i class="fas fa-calendar-week text-success me-1"></i>
+                    Pilih Minggu
+                  </label>
+                  <select class="form-select" id="week-select">
+
+                    <!-- Options will be populated by JavaScript -->
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            <!-- Schedule Grid -->
+            <main class="schedule-grid" id="schedule-container">
+
+              <!-- Schedule cards will be populated by JavaScript -->
+            </main>
+
+            <!-- Footer Section -->
+            <footer class="footer-section">
+              <div class="row">
+                <div class="col-12 text-center">
+                  <p class="mb-2">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    Centang jadwal untuk menyimpan progres. Data tersimpan di browser Anda.
+                  </p>
+                  <p class="mb-0">
+                    <small class="text-muted">
+                      Training plan berdasarkan podcast
+                      <a href="https://www.youtube.com/watch?v=nogKhQBu12A" target="_blank" class="text-decoration-none">
+                        Dr. Tirta &amp; Coach Latief Nurarifin
+                        <i class="fas fa-external-link-alt ms-1"></i>
+                      </a>
+                    </small>
+                  </p>
+                  <div class="mt-3">
+                    <button class="btn btn-outline-primary btn-sm me-2" onclick="location.reload()">
+                      <i class="fas fa-sync-alt me-1"></i>
+                      Refresh Data
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" id="share-progress">
+                      <i class="fas fa-share-alt me-1"></i>
+                      Bagikan Progress
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </footer>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Toast Container -->
@@ -179,33 +221,31 @@
 
     <!-- Bootstrap 5 JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Custom JavaScript -->
     <script src="./js/app.js"></script>
 
     <!-- Share Progress Functionality -->
     <script>
-        document.getElementById('share-progress').addEventListener('click', async () => {
-            const progress = localStorage.getItem('currentProgress') || '0';
-            const shareData = {
-                title: 'KamenRun - Progress Saya',
-                text: `Saya sudah menyelesaikan ${progress}% dari target running saya dengan KamenRun! 🏃‍♂️💪`,
-                url: window.location.href
-            };
-
-            try {
-                if (navigator.share) {
-                    await navigator.share(shareData);
-                } else {
-                    // Fallback: copy to clipboard
-                    const text = `${shareData.text}\n${shareData.url}`;
-                    await navigator.clipboard.writeText(text);
-                    
-                    // Show toast
-                    const toastContainer = document.getElementById('toast-container');
-                    const toast = document.createElement('div');
-                    toast.className = 'toast align-items-center text-white bg-info border-0';
-                    toast.innerHTML = `
+      document.getElementById('share-progress').addEventListener('click', async () => {
+        const progress = localStorage.getItem('currentProgress') || '0';
+        const shareData = {
+          title: 'KamenRun - Progress Saya',
+          text: `Saya sudah menyelesaikan ${progress}% dari target running saya dengan KamenRun! 🏃‍♂️💪`,
+          url: window.location.href
+        };
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else {
+            // Fallback: copy to clipboard
+            const text = `${shareData.text}\n${shareData.url}`;
+            await navigator.clipboard.writeText(text);
+            // Show toast
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-info border-0';
+            toast.innerHTML = `
                         <div class="d-flex">
                             <div class="toast-body">
                                 <i class="fas fa-copy me-2"></i>
@@ -214,14 +254,14 @@
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                         </div>
                     `;
-                    toastContainer.appendChild(toast);
-                    const bsToast = new bootstrap.Toast(toast);
-                    bsToast.show();
-                }
-            } catch (error) {
-                console.error('Error sharing progress:', error);
-            }
-        });
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+          }
+        } catch (error) {
+          console.error('Error sharing progress:', error);
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
