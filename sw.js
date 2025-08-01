@@ -29,22 +29,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
-});
+// This was moved to the enhanced activate event below
 
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', event => {
@@ -228,36 +213,222 @@ self.addEventListener('error', event => {
   console.error('Service worker error:', event.error);
 });
 
-// Periodic background sync (if supported)
-self.addEventListener('periodicsync', event => {
-  if (event.tag === 'daily-motivation') {
-    event.waitUntil(
-      sendDailyMotivation()
-    );
+// Background notification scheduler
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
+    const { time, isEnabled } = event.data;
+    
+    if (isEnabled) {
+      scheduleBackgroundNotification(time);
+    } else {
+      clearScheduledNotifications();
+    }
   }
 });
 
-async function sendDailyMotivation() {
+// Schedule background notifications that work when app is closed
+function scheduleBackgroundNotification(timeString) {
+  // Clear existing alarms first
+  clearScheduledNotifications();
+  
+  const [hours, minutes] = timeString.split(':').map(Number);
+  const now = new Date();
+  const scheduledTime = new Date();
+  scheduledTime.setHours(hours, minutes, 0, 0);
+  
+  // If time has passed today, schedule for tomorrow
+  if (scheduledTime <= now) {
+    scheduledTime.setDate(scheduledTime.getDate() + 1);
+  }
+  
+  const timeUntilNotification = scheduledTime.getTime() - now.getTime();
+  
+  // Store the scheduled time in IndexedDB for persistence
+  storeNotificationSchedule(timeString);
+  
+  // Use setTimeout for immediate scheduling (works while SW is active)
+  setTimeout(() => {
+    sendDailyNotification();
+    // Schedule recurring notifications every 24 hours
+    setInterval(() => {
+      sendDailyNotification();
+    }, 24 * 60 * 60 * 1000);
+  }, timeUntilNotification);
+}
+
+function clearScheduledNotifications() {
+  // Clear stored schedule
+  deleteStoredNotificationSchedule();
+}
+
+// Store notification schedule in IndexedDB for persistence
+async function storeNotificationSchedule(timeString) {
+  try {
+    const db = await openNotificationDB();
+    const transaction = db.transaction(['notifications'], 'readwrite');
+    const store = transaction.objectStore('notifications');
+    
+    await store.put({
+      id: 'daily-schedule',
+      time: timeString,
+      enabled: true,
+      lastSent: null
+    });
+  } catch (error) {
+    console.error('Failed to store notification schedule:', error);
+  }
+}
+
+async function deleteStoredNotificationSchedule() {
+  try {
+    const db = await openNotificationDB();
+    const transaction = db.transaction(['notifications'], 'readwrite');
+    const store = transaction.objectStore('notifications');
+    
+    await store.delete('daily-schedule');
+  } catch (error) {
+    console.error('Failed to delete notification schedule:', error);
+  }
+}
+
+// Open IndexedDB for notification storage
+function openNotificationDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('KamenRunNotifications', 1);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('notifications')) {
+        db.createObjectStore('notifications', { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+// Check and send notifications on SW activation
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    Promise.all([
+      // Existing cache cleanup
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Check for scheduled notifications
+      checkAndScheduleNotifications()
+    ])
+  );
+  self.clients.claim();
+});
+
+// Check stored notification schedule and resume if needed
+async function checkAndScheduleNotifications() {
+  try {
+    const db = await openNotificationDB();
+    const transaction = db.transaction(['notifications'], 'readonly');
+    const store = transaction.objectStore('notifications');
+    const request = store.get('daily-schedule');
+    
+    request.onsuccess = () => {
+      const schedule = request.result;
+      if (schedule && schedule.enabled) {
+        const now = new Date();
+        const [hours, minutes] = schedule.time.split(':').map(Number);
+        const scheduledTime = new Date();
+        scheduledTime.setHours(hours, minutes, 0, 0);
+        
+        // Check if we missed today's notification
+        const lastSent = schedule.lastSent ? new Date(schedule.lastSent) : null;
+        const today = new Date().toDateString();
+        const lastSentToday = lastSent && lastSent.toDateString() === today;
+        
+        if (scheduledTime <= now && !lastSentToday) {
+          // Send missed notification
+          sendDailyNotification();
+        }
+        
+        // Schedule future notifications
+        scheduleBackgroundNotification(schedule.time);
+      }
+    };
+  } catch (error) {
+    console.error('Failed to check notification schedule:', error);
+  }
+}
+
+// Enhanced daily notification function
+async function sendDailyNotification() {
   const motivationalQuotes = [
     "Langkah pertama adalah yang tersulit. Kamu sudah melewatinya! 💪",
     "Hari ini sakit, besok jadi kuat. Terus berlari! 🏃‍♂️",
     "Jangan ragu saat lelah, ragulah saat kamu berhenti. 🎯",
     "Satu-satunya lari yang buruk adalah yang tidak kamu lakukan. ✨",
-    "Berlari adalah tentang dirimu sendiri. Kamu vs Kamu. 🔥"
+    "Berlari adalah tentang dirimu sendiri. Kamu vs Kamu. 🔥",
+    "Konsistensi lebih penting dari kecepatan. 📈",
+    "Kamu lebih kuat dari yang kamu kira. Buktikan hari ini! 💯",
+    "Setiap kilometer adalah pencapaian. 🏆",
+    "Jangan biarkan pikiranmu menghentikan kakimu. 🧠"
   ];
   
   const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
   
-  await self.registration.showNotification('KamenRun Daily Motivation 🌟', {
+  // Update last sent time
+  try {
+    const db = await openNotificationDB();
+    const transaction = db.transaction(['notifications'], 'readwrite');
+    const store = transaction.objectStore('notifications');
+    const request = store.get('daily-schedule');
+    
+    request.onsuccess = () => {
+      const schedule = request.result;
+      if (schedule) {
+        schedule.lastSent = new Date().toISOString();
+        store.put(schedule);
+      }
+    };
+  } catch (error) {
+    console.error('Failed to update last sent time:', error);
+  }
+  
+  // Show notification
+  await self.registration.showNotification('KamenRun - Waktunya Berlari! 🏃‍♂️', {
     body: randomQuote,
-    icon: './icons/icon-192x192.png',
+    icon: './icons/manifest-icon-192.maskable.png',
     badge: './icons/icon-72x72.png',
-    tag: 'daily-motivation',
+    tag: 'daily-reminder',
+    renotify: true,
+    requireInteraction: false,
+    persistent: true,
     actions: [
       {
         action: 'view',
-        title: 'Lihat Jadwal'
+        title: 'Lihat Jadwal',
+        icon: './icons/icon-96x96.png'
+      },
+      {
+        action: 'dismiss',
+        title: 'Tutup'
       }
-    ]
+    ],
+    data: {
+      url: './index.html',
+      timestamp: Date.now()
+    }
   });
-} 
+}
+
+// Periodic background sync (enhanced)
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'daily-motivation') {
+    event.waitUntil(sendDailyNotification());
+  }
+}); 

@@ -230,6 +230,22 @@ class KamenRunApp {
                 this.showToast('Waktu notifikasi berhasil disimpan! 🔔', 'success');
             });
         }
+
+        // QR Code Export/Import setup
+        const exportQRBtn = document.getElementById('export-qr-btn');
+        const importQRBtn = document.getElementById('import-qr-btn');
+        
+        if (exportQRBtn) {
+            exportQRBtn.addEventListener('click', () => {
+                this.exportDataAsQR();
+            });
+        }
+        
+        if (importQRBtn) {
+            importQRBtn.addEventListener('click', () => {
+                this.showQRModal('', 'import');
+            });
+        }
     }
 
     // PWA functionality
@@ -288,27 +304,52 @@ class KamenRunApp {
         });
     }
 
-    // Notification system
+    // Enhanced notification system with background support
     async setupNotifications() {
         if ('Notification' in window && 'serviceWorker' in navigator) {
             const permission = await Notification.requestPermission();
             
             if (permission === 'granted') {
-                this.scheduleNotification();
+                await this.scheduleBackgroundNotification();
             }
         }
     }
 
-    scheduleNotification() {
-        // Clear existing notifications
+    async scheduleBackgroundNotification() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.getNotifications().then(notifications => {
-                    notifications.forEach(notification => notification.close());
-                });
-            });
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                
+                // Send notification schedule to service worker
+                if (registration.active) {
+                    registration.active.postMessage({
+                        type: 'SCHEDULE_NOTIFICATION',
+                        time: this.notificationTime,
+                        isEnabled: true
+                    });
+                }
+                
+                // Register periodic background sync if supported
+                if ('periodicSync' in registration) {
+                    try {
+                        await registration.periodicSync.register('daily-motivation', {
+                            minInterval: 24 * 60 * 60 * 1000 // 24 hours
+                        });
+                        console.log('Periodic background sync registered');
+                    } catch (error) {
+                        console.log('Periodic background sync not supported:', error);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to schedule background notification:', error);
+                // Fallback to direct scheduling
+                this.scheduleDirectNotification();
+            }
         }
+    }
 
+    // Fallback notification scheduling for when service worker isn't available
+    scheduleDirectNotification() {
         const now = new Date();
         const [hours, minutes] = this.notificationTime.split(':');
         const notificationTime = new Date();
@@ -322,36 +363,24 @@ class KamenRunApp {
         const timeUntilNotification = notificationTime.getTime() - now.getTime();
 
         setTimeout(() => {
-            this.sendNotification();
+            this.sendDirectNotification();
             // Schedule daily notifications
             setInterval(() => {
-                this.sendNotification();
+                this.sendDirectNotification();
             }, 24 * 60 * 60 * 1000); // 24 hours
         }, timeUntilNotification);
     }
 
-    sendNotification() {
+    // Direct notification for fallback
+    sendDirectNotification() {
         const randomQuote = this.motivationalQuotes[Math.floor(Math.random() * this.motivationalQuotes.length)];
         
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification('KamenRun - Waktunya Berlari! 🏃‍♂️', {
-                    body: randomQuote,
-                    icon: './icons/icon-192x192.png',
-                    badge: './icons/icon-72x72.png',
-                    tag: 'daily-reminder',
-                    renotify: true,
-                    actions: [
-                        {
-                            action: 'view',
-                            title: 'Lihat Jadwal'
-                        },
-                        {
-                            action: 'dismiss',
-                            title: 'Tutup'
-                        }
-                    ]
-                });
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('KamenRun - Waktunya Berlari! 🏃‍♂️', {
+                body: randomQuote,
+                icon: './icons/manifest-icon-192.maskable.png',
+                badge: './icons/icon-72x72.png',
+                tag: 'daily-reminder'
             });
         }
     }
@@ -405,6 +434,406 @@ class KamenRunApp {
         container.style.zIndex = '1055';
         document.body.appendChild(container);
         return container;
+    }
+
+    // QR Code Data Transfer System
+    async exportDataAsQR() {
+        try {
+            const exportData = {
+                version: '1.0.0',
+                timestamp: new Date().toISOString(),
+                data: {
+                    runningScheduleData: this.currentData,
+                    notificationTime: this.notificationTime,
+                    currentProgress: localStorage.getItem('currentProgress') || '0'
+                }
+            };
+
+            const dataString = JSON.stringify(exportData);
+            
+            // Check data size (QR codes have limits)
+            if (dataString.length > 2000) {
+                this.showToast('Data terlalu besar untuk QR code. Mencoba kompresi...', 'warning');
+                
+                // Compress data by removing unnecessary fields
+                const compressedData = this.compressExportData(exportData);
+                const compressedString = JSON.stringify(compressedData);
+                
+                if (compressedString.length > 2000) {
+                    this.showToast('Data masih terlalu besar. Silakan export per fase.', 'error');
+                    return;
+                }
+                
+                await this.generateQRCode(compressedString);
+            } else {
+                await this.generateQRCode(dataString);
+            }
+            
+        } catch (error) {
+            console.error('Export failed:', error);
+            this.showToast('Gagal mengexport data: ' + error.message, 'error');
+        }
+    }
+
+    compressExportData(data) {
+        // Remove completed tasks and keep only essential data
+        const compressed = {
+            v: data.version,
+            t: data.timestamp,
+            d: {
+                schedule: data.data.runningScheduleData.map(phase => ({
+                    name: phase.phaseName,
+                    weeks: phase.weeks.map(week => ({
+                        num: week.weekNumber,
+                        days: week.days.map(day => ({
+                            day: day.day.substring(0, 3), // Shorten day names
+                            task: day.task.length > 50 ? day.task.substring(0, 50) + '...' : day.task,
+                            done: day.done,
+                            icon: day.icon,
+                            rest: day.isRest
+                        }))
+                    }))
+                })),
+                notif: data.data.notificationTime,
+                progress: data.data.currentProgress
+            }
+        };
+        return compressed;
+    }
+
+    async generateQRCode(dataString) {
+        // Create QR code using QR Server API (free service)
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(dataString)}`;
+        
+        // Show QR code modal
+        this.showQRModal(qrUrl, 'export');
+    }
+
+    showQRModal(qrUrl, type = 'export') {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'qrModal';
+        modal.setAttribute('tabindex', '-1');
+        
+        const modalContent = type === 'export' ? `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-qrcode me-2"></i>
+                            Export Data QR Code
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p class="mb-3">Scan QR code ini dengan browser lain untuk import data:</p>
+                        <img src="${qrUrl}" alt="QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>QR code berisi semua data progress Anda. Simpan screenshot jika diperlukan.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn btn-primary" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print QR Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+        ` : `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-camera me-2"></i>
+                            Import Data dari QR Code
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Pilih metode import:</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary" id="camera-scan-btn">
+                                    <i class="fas fa-camera me-2"></i>Scan dengan Kamera
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="file-upload-btn">
+                                    <i class="fas fa-upload me-2"></i>Upload Gambar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="camera-container" style="display: none;">
+                            <video id="qr-video" class="w-100 mb-3" style="max-height: 300px;"></video>
+                            <div class="alert alert-warning">
+                                <small>Arahkan kamera ke QR code untuk scan otomatis</small>
+                            </div>
+                        </div>
+                        
+                                                 <div id="file-container" style="display: none;">
+                             <input type="file" class="form-control mb-2" id="qr-file-input" accept="image/*">
+                             <div class="text-center mb-2">atau</div>
+                             <textarea class="form-control" id="manual-data-input" rows="4" placeholder="Paste data QR code di sini jika tidak bisa scan"></textarea>
+                             <button type="button" class="btn btn-outline-primary btn-sm mt-2 w-100" id="process-manual-data">
+                                 <i class="fas fa-paste me-2"></i>Process Manual Data
+                             </button>
+                             <div class="alert alert-info mt-2">
+                                 <small>Upload screenshot QR code atau paste text data secara manual</small>
+                             </div>
+                         </div>
+                        
+                        <div id="import-result" class="mt-3"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-success" id="confirm-import-btn" style="display: none;">
+                            <i class="fas fa-check me-2"></i>Confirm Import
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        modal.innerHTML = modalContent;
+        document.body.appendChild(modal);
+        
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        if (type === 'import') {
+            this.setupImportModalEvents(modal);
+        }
+        
+        modal.addEventListener('hidden.bs.modal', () => {
+            modal.remove();
+        });
+    }
+
+    setupImportModalEvents(modal) {
+        const cameraScanBtn = modal.querySelector('#camera-scan-btn');
+        const fileUploadBtn = modal.querySelector('#file-upload-btn');
+        const cameraContainer = modal.querySelector('#camera-container');
+        const fileContainer = modal.querySelector('#file-container');
+        const video = modal.querySelector('#qr-video');
+        const fileInput = modal.querySelector('#qr-file-input');
+        
+        cameraScanBtn.addEventListener('click', () => {
+            cameraContainer.style.display = 'block';
+            fileContainer.style.display = 'none';
+            this.startCameraScanning(video);
+        });
+        
+        fileUploadBtn.addEventListener('click', () => {
+            fileContainer.style.display = 'block';
+            cameraContainer.style.display = 'none';
+            this.stopCameraScanning();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                this.processQRImage(e.target.files[0]);
+            }
+        });
+        
+        // Manual data input
+        const manualDataInput = modal.querySelector('#manual-data-input');
+        const processManualBtn = modal.querySelector('#process-manual-data');
+        
+        processManualBtn.addEventListener('click', () => {
+            const data = manualDataInput.value.trim();
+            if (data) {
+                this.processManualQRData(data);
+            } else {
+                this.showToast('Silakan masukkan data QR code terlebih dahulu', 'warning');
+            }
+        });
+    }
+
+    async startCameraScanning(video) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+            video.srcObject = stream;
+            video.play();
+            
+            // Start QR scanning (simplified implementation)
+            this.scanningInterval = setInterval(() => {
+                this.captureAndScanFrame(video);
+            }, 500);
+            
+        } catch (error) {
+            console.error('Camera access failed:', error);
+            this.showToast('Tidak dapat mengakses kamera. Gunakan upload file.', 'error');
+        }
+    }
+
+    stopCameraScanning() {
+        if (this.scanningInterval) {
+            clearInterval(this.scanningInterval);
+        }
+        
+        const video = document.querySelector('#qr-video');
+        if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+        }
+    }
+
+    captureAndScanFrame(video) {
+        // This is a simplified implementation
+        // In a real app, you'd use a QR code scanning library like jsQR
+        console.log('Scanning frame...');
+    }
+
+    async processQRImage(file) {
+        // This would typically use a QR code reading library
+        // For now, we'll show a placeholder
+        this.showToast('Fitur scan QR dari gambar akan segera hadir! Gunakan manual input sebagai alternatif.', 'info');
+    }
+
+    processManualQRData(data) {
+        try {
+            // Show preview of data to be imported
+            const importResult = document.getElementById('import-result');
+            const confirmBtn = document.getElementById('confirm-import-btn');
+            
+            // Try to parse and validate the data
+            const parsedData = JSON.parse(data);
+            
+            if (!parsedData.data || !parsedData.data.runningScheduleData) {
+                throw new Error('Format data tidak valid');
+            }
+            
+            // Show preview
+            const phaseCount = parsedData.data.runningScheduleData.length;
+            const notification = parsedData.data.notificationTime || 'Tidak diatur';
+            const progress = parsedData.data.currentProgress || '0';
+            
+            importResult.innerHTML = `
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-check-circle me-2"></i>Data Valid Ditemukan!</h6>
+                    <ul class="mb-0">
+                        <li><strong>Jumlah Fase:</strong> ${phaseCount}</li>
+                        <li><strong>Waktu Notifikasi:</strong> ${notification}</li>
+                        <li><strong>Progress:</strong> ${progress}%</li>
+                        <li><strong>Timestamp:</strong> ${new Date(parsedData.timestamp).toLocaleString('id-ID')}</li>
+                    </ul>
+                </div>
+            `;
+            
+            confirmBtn.style.display = 'block';
+            confirmBtn.onclick = () => {
+                this.importDataFromQR(data);
+                bootstrap.Modal.getInstance(document.getElementById('qrModal')).hide();
+            };
+            
+        } catch (error) {
+            const importResult = document.getElementById('import-result');
+            importResult.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Data Tidak Valid</h6>
+                    <p class="mb-0">Error: ${error.message}</p>
+                </div>
+            `;
+            
+            document.getElementById('confirm-import-btn').style.display = 'none';
+        }
+    }
+
+    async importDataFromQR(qrData) {
+        try {
+            let importData;
+            
+            // Try to parse QR data
+            try {
+                importData = JSON.parse(qrData);
+            } catch (error) {
+                throw new Error('QR code tidak valid atau rusak');
+            }
+            
+            // Validate data structure
+            if (!importData.data || !importData.data.runningScheduleData) {
+                throw new Error('Format data tidak sesuai');
+            }
+            
+            // Convert compressed data back to full format if needed
+            if (importData.v) {
+                importData = this.decompressImportData(importData);
+            }
+            
+            // Backup current data
+            const backup = {
+                data: this.currentData,
+                notificationTime: this.notificationTime,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('kamenrun-backup', JSON.stringify(backup));
+            
+            // Import new data
+            this.currentData = importData.data.runningScheduleData;
+            this.notificationTime = importData.data.notificationTime || '08:00';
+            
+            // Save imported data
+            this.saveData();
+            localStorage.setItem('notificationTime', this.notificationTime);
+            localStorage.setItem('currentProgress', importData.data.currentProgress || '0');
+            
+            // Update UI
+            this.populatePhaseSelect();
+            this.populateWeekSelect(0);
+            this.renderSchedule(0, 0);
+            
+            // Update notification time input
+            const notificationTimeInput = document.getElementById('notification-time');
+            if (notificationTimeInput) {
+                notificationTimeInput.value = this.notificationTime;
+            }
+            
+            this.showToast('Data berhasil diimport! 🎉', 'success');
+            
+        } catch (error) {
+            console.error('Import failed:', error);
+            this.showToast('Gagal import data: ' + error.message, 'error');
+        }
+    }
+
+    decompressImportData(compressed) {
+        // Convert compressed format back to full format
+        return {
+            version: compressed.v,
+            timestamp: compressed.t,
+            data: {
+                runningScheduleData: compressed.d.schedule.map(phase => ({
+                    phaseName: phase.name,
+                    weeks: phase.weeks.map(week => ({
+                        weekNumber: week.num,
+                        days: week.days.map(day => ({
+                            day: this.expandDayName(day.day),
+                            task: day.task,
+                            done: day.done,
+                            icon: day.icon,
+                            isRest: day.rest
+                        }))
+                    }))
+                })),
+                notificationTime: compressed.d.notif,
+                currentProgress: compressed.d.progress
+            }
+        };
+    }
+
+    expandDayName(shortDay) {
+        const dayMap = {
+            'Sen': 'Senin',
+            'Sel': 'Selasa', 
+            'Rab': 'Rabu',
+            'Kam': 'Kamis',
+            'Jum': 'Jumat',
+            'Sab': 'Sabtu',
+            'Min': 'Minggu'
+        };
+        return dayMap[shortDay] || shortDay;
     }
 }
 

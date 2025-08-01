@@ -122,32 +122,74 @@
               </div>
             </section>
 
-            <!-- Notification Settings -->
-            <section class="notification-settings">
-              <h4 class="mb-3">
-                <i class="fas fa-bell text-warning me-2"></i>
-                Pengaturan Notifikasi
-              </h4>
-              <div class="row align-items-center">
-                <div class="col-md-6">
-                  <label for="notification-time" class="form-label">
-                    <i class="fas fa-clock me-1"></i>
-                    Waktu Pengingat Harian
-                  </label>
-                  <input type="time" class="form-control" id="notification-time" value="08:00">
-                </div>
-                <div class="col-md-6 mt-3 mt-md-0">
-                  <button class="btn btn-success-custom btn-custom w-100" id="save-notification">
-                    <i class="fas fa-save me-2"></i>
-                    Simpan Pengaturan
-                  </button>
-                </div>
-              </div>
-              <small class="text-muted">
-                <i class="fas fa-info-circle me-1"></i>
-                Notifikasi akan mengingatkan Anda untuk menjalankan jadwal latihan setiap hari.
-              </small>
-            </section>
+                                <!-- Notification Settings -->
+                    <section class="notification-settings">
+                        <h4 class="mb-3">
+                            <i class="fas fa-bell text-warning me-2"></i>
+                            Pengaturan Notifikasi
+                        </h4>
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <label for="notification-time" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Waktu Pengingat Harian
+                                </label>
+                                <input type="time" class="form-control" id="notification-time" value="08:00">
+                            </div>
+                            <div class="col-md-6 mt-3 mt-md-0">
+                                <button class="btn btn-success-custom btn-custom w-100" id="save-notification">
+                                    <i class="fas fa-save me-2"></i>
+                                    Simpan Pengaturan
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Notifikasi akan mengingatkan Anda untuk menjalankan jadwal latihan setiap hari.
+                        </small>
+                    </section>
+
+                    <!-- Data Transfer Section -->
+                    <section class="notification-settings">
+                        <h4 class="mb-3">
+                            <i class="fas fa-exchange-alt text-info me-2"></i>
+                            Transfer Data Antar Browser
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-qrcode fa-3x text-primary mb-3"></i>
+                                        <h6 class="card-title">Export Data</h6>
+                                        <p class="card-text small">Buat QR code dari data progress Anda</p>
+                                        <button class="btn btn-primary btn-custom" id="export-qr-btn">
+                                            <i class="fas fa-download me-2"></i>
+                                            Export ke QR Code
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-camera fa-3x text-success mb-3"></i>
+                                        <h6 class="card-title">Import Data</h6>
+                                        <p class="card-text small">Scan QR code untuk import data</p>
+                                        <button class="btn btn-success-custom btn-custom" id="import-qr-btn">
+                                            <i class="fas fa-upload me-2"></i>
+                                            Import dari QR Code
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <small>
+                                <strong>Cara menggunakan:</strong> Export data dari browser A, lalu scan QR code di browser B untuk transfer semua progress Anda.
+                            </small>
+                        </div>
+                    </section>
 
             <!-- Controls Section -->
             <section class="controls-section">
